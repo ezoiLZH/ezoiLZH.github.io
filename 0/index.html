@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Project 0 of CS180</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #686868 0%, #ffffff 50%);
+            margin: 0;
+            padding: 0;
+            color: #222;
+        }
+
+        header {
+            background: #5ca0ff;
+            background-image: url("./media/image.png");
+            background-size: cover;
+            background-position: center;
+            /* width: 80%; */
+            height: 350px;
+            color: #fff;
+            padding: 10rem 1rem 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(58, 123, 213, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 3rem;
+            letter-spacing: 2px;
+        }
+
+        p {
+            line-height: 1.4;
+            font-size: 18px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(58, 123, 213, 0.08);
+            padding: 2rem;
+        }
+
+        section {
+            margin-bottom: 2.5rem;
+        }
+
+        h2 {
+            color: #3a7bd5;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .photo {
+            max-width: 200px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(58, 123, 213, 0.07);
+            margin-bottom: 1rem;
+        }
+
+        .photo2 {
+            width: 500px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(58, 123, 213, 0.07);
+            margin-bottom: 1rem;
+        }
+
+        .perspective {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-width: 1200px;
+            min-width: 0;
+            margin-left: auto;
+            margin-right: auto;
+            /* border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(58, 123, 213, 0.07);
+            margin-bottom: 1rem; */
+        }
+
+        .part {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .caption {
+            font-size: 0.95rem;
+            color: #666;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                padding: 1rem;
+            }
+
+            .part {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+    <style>
+        #nextPartBtn {
+            position: fixed;
+            bottom: 100px;
+            right: 40px;
+            z-index: 999;
+            background: #3a7bd5;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(58, 123, 213, 0.15);
+            cursor: pointer;
+            display: block;
+            transition: background 0.2s;
+        }
+
+        #nextPartBtn:hover {
+            background: #174ea6;
+        }
+    </style>
+    <style>
+        #backToTopBtn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            z-index: 999;
+            background: #3a7bd5;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(58, 123, 213, 0.15);
+            cursor: pointer;
+            display: none;
+            transition: background 0.2s;
+        }
+
+        #backToTopBtn:hover {
+            background: #174ea6;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 style="color: #c4c4c4; text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5); font-size: 70px;">Project 0</h1>
+        <h2 style="color: #fff; font-size: 40px;">Becoming Friends with Your Camera</h2>
+        <p style="color: #e0e0e0; font-style: italic; font-size: 20px;">Zihang Li</p>
+    </header>
+    <main>
+        <section>
+            <h2>Part 1: Selfie - The Wrong Way vs. The Right Way</h2>
+            <div class="part">
+                <div>
+                    <p>
+                        Here are the photos I took for my friend in different distances. I zoomed in while stepping back
+                        to make the size of the subject always be the same.
+                    </p>
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;">
+                        <div>
+                            <img src="./media/10cm.jpg" alt="10cm" class="photo">
+                            <div class="caption">10cm</div>
+                        </div>
+                        <div>
+                            <img src="./media/30cm.jpg" alt="30cm" class="photo">
+                            <div class="caption">30cm</div>
+                        </div>
+                        <div>
+                            <img src="./media/80cm.jpg" alt="80cm" class="photo">
+                            <div class="caption">80cm</div>
+                        </div>
+                        <div>
+                            <img src="./media/200cm.jpg" alt="200cm" class="photo">
+                            <div class="caption">200cm</div>
+                        </div>
+                    </div>
+                    <p>
+                        After comparing these photos, I found that the photo taken at 10cm has significant perspective
+                        distortion, making his nose appear disproportionately large compared to the rest of his face. As
+                        the distance increases to 30cm and 80cm, the distortion lessens, and facial features appear more
+                        balanced and natural. By 200cm, the perspective distortion is minimal, resulting in a more
+                        natural representation of him.
+                        <br>
+                        <br>
+                        This experiment shows that the difference of distance can greatly impact what subject looks like
+                        in the photo, even the subject has almost the same size in each photo. Too near distance may
+                        cause the people or objects in the photo to look weird and unnatural, while a moderate distance
+                        helps get a more flattering and realistic photo.
+                    </p>
+                </div>
+                <div>
+                    <h3>The Reason Why Distance Matters</h3>
+                    <p>
+                        The reason why distance matters in photography is due to the principles of perspective. When you
+                        take a photo from a close distance, the subject's features are exaggerated. That means the depth
+                        difference inside an object may be significant in the overall small distance to the camera. This
+                        is particularly noticeable in portraits, where the nose and forehead may appear larger than
+                        they are in reality. As you increase the distance, the perspective becomes more natural, and the
+                        subject's features are represented more accurately.
+                    </p>
+                    <div style="width:100%;">
+                        <img src="./media/perspective1.png" alt="Perspective Distortion"
+                            style="width:80%;height:auto;display:block;margin:0 auto;">
+                        <img src="./media/perspective2.png" alt="Perspective Natural"
+                            style="width:80%;height:auto;display:block;margin:1rem auto 0 auto;">
+                    </div>
+                    <p>
+                        As what is showing in these graphs, the inside square in the first graph is much more bigger
+                        than the second graph. This definitely illustrates when keeping the size of the whole object
+                        same, distance can affect the contrast between protruding and recessed parts inside an object,
+                        resulting in different photos.
+                    </p>
+                </div>
+
+        </section>
+        <section>
+            <h2>Part 2: Architectural Perspective Compression</h2>
+            <div class="part">
+                <div>
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;">
+                        <div>
+                            <img src="./media/street2.jpg" alt="10cm" class="photo2">
+                            <div class="caption"></div>
+                        </div>
+                        <div>
+                            <img src="./media/street1.jpg" alt="30cm" class="photo2">
+                            <div class="caption"></div>
+                        </div>
+                    </div>
+                    <p>
+                        <b>The First Shot (From Far Away, Zoomed In):</b>
+                    </p>
+                    <p>
+                        The scene appears compressed or flattened. The buildings and objects along the
+                        street seem stacked on top of
+                        each other, closer together than they are in reality. There's a sense of density and layers.
+                        This is the "perspective
+                        compression" effect often used in cityscape and architectural photography.
+                    </p>
+                    <p>
+                        <b>The Second Shot (Up Close, Wide Angle):</b>
+                    </p>
+                    <p>
+                        The scene has exaggerated depth and expansive perspective. The building down the street look
+                        very far away and small. The distance between objects
+                        feels vast and stretched
+                        out.
+                </div>
+                <div>
+                    <h3>Why This Happens</h3>
+                    <p>
+                        The compression effect happens because from a great distance, just like what happens in part 1,
+                        the relative space between objects like buildings becomes
+                        a tiny fraction of their vast distance from the camera, making them appear stacked closely
+                        together. When you zoom in from that far position, you isolate this flattened perspective. In
+                        contrast, walking close to the scene drastically exaggerates the perceived space between the
+                        foreground and background, making the same street look much longer and deeper.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <section>
+            <h2>Part 3: The Dolly Zoom</h2>
+            <div class="part">
+                <div>
+                    <div class="caption">On the Labor Day, I went hiking with my friends to the nearby mountains and
+                        took a video of the dolly zoom effect.</div>
+
+                    <img src="./media/dollyzoom.gif" alt="Dolly Zoom GIF"
+                        style="width:100%;max-width:400px;display:flex;margin:1rem auto 1rem auto;">
+                    <video controls style="width:100%;max-width:600px;display:block;margin:0 auto 1rem auto;">
+                        <source src="./media/video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div style="flex:1;">
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+    </main>
+    <button id="nextPartBtn" title="Next Part">↓</button>
+    <script>
+        document.getElementById('nextPartBtn').onclick = function () {
+            const sections = Array.from(document.querySelectorAll('main section'));
+            const scrollY = window.scrollY;
+            const next = sections.find(sec => sec.getBoundingClientRect().top + window.scrollY > scrollY + 10);
+            if (next) {
+                next.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+    </script>
+    </main>
+    <button id="backToTopBtn" title="Back to Top">↑</button>
+    <script>
+        window.addEventListener('scroll', function () {
+            const btn = document.getElementById('backToTopBtn');
+            if (window.scrollY > 300) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+        document.getElementById('backToTopBtn').onclick = function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    </script>
+</body>
+
+</html>
