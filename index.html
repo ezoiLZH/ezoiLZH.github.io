@@ -5,8 +5,49 @@
     <title>My Portfolio</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(58, 123, 213, 0.12);
+            padding: 3rem 2.5rem 2.5rem 2.5rem;
+            text-align: center;
+            min-width: 320px;
+        }
+
+        h1 {
+            color: #3a7bd5;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        a.button {
+            display: inline-block;
+            background: linear-gradient(90deg, #5ca0ff 0%, #3a7bd5 100%);
+            color: #fff;
+            padding: 0.9rem 2.2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(58, 123, 213, 0.10);
+            transition: background 0.2s, transform 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        a.button:hover {
+            background: linear-gradient(90deg, #3a7bd5 0%, #5ca0ff 100%);
+            transform: translateY(-2px) scale(1.04);
         }
     </style>
 </head>
