@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <!-- highlight.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+</head>
+
+<body>
+    <!-- <div class="parallax-bg"></div> -->
+    <header>
+        <h1 style="color:#3a7bd5; font-family: 'Montserrat', sans-serif; font-size: 72px;">Project 1</h1>
+        <p style="color:#2f2f2f; font-size: 30px;">Images of the Russian Empire: Colorizing the Prokudin-Gorskii photo
+            collection
+        </p>
+    </header>
+    <div class="main-content-area">
+        <section
+            style="max-width:900px;margin:2.5rem auto 2rem auto;padding:2rem 2.5rem;background:linear-gradient(90deg,#fafdff 60%,#eaf1fa 100%);border-radius:18px;box-shadow:0 4px 24px rgba(58,123,213,0.10);border-left:6px solid #3a7bd5;">
+            <h3 style="color:#2a5db0; font-size:2rem; margin-bottom:1rem;">Project Introduction</h3>
+            <p style="color:#2d3540; font-size:1.13rem; line-height:1.85;">This project aims to restore the early color
+                photographs taken by Prokudin-Gorskii in the Russian Empire. By automatically splitting, aligning, and
+                merging the BGR channels from grayscale images, we achieve color image reconstruction. The project
+                covers
+                key techniques such as channel splitting, automatic alignment (NCC + pyramid), image fusion, and
+                brightness
+                normalization, and finally presents several restored color results.</p>
+        </section>
+        <section style="margin-bottom: 2.5rem;">
+            <h2 style="color:#2a5db0; text-align:center; margin-bottom:1.2rem; letter-spacing:1px; font-size:2.1rem;">
+                Project Principle & Key Code</h2>
+            <div
+                style="color:#2d3540; font-size:1.13rem; max-width:900px; margin:0 auto 2.2rem auto; line-height:1.85; background:linear-gradient(90deg,#fafdff 60%,#eaf1fa 100%); border-radius:18px; padding:1.5rem 2.2rem; box-shadow:0 4px 24px rgba(58,123,213,0.10); border-left:6px solid #3a7bd5;">
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Step 1: Split BGR Channels</span><br>
+                    <span style="color:#444;">The image is split into three equal parts, corresponding to the B, G, and
+                        <details style="margin-top:0.7em;">
+                            <summary
+                                style="cursor:pointer; font-weight:500; color:#2a5db0; background-color: rgb(236, 244, 250);">
+                                Show Code</summary>
+                            <pre
+                                style="background:#23272e;font-size:0.9rem;padding:0.5em 1em;border-radius:10px;overflow-x:auto;line-height:1.7;margin:0.7em 0 0 0;box-shadow:0 2px 8px rgba(58,123,213,0.08);">
+                                <code class="language-python">
+def split_bgr(img):
+    h = img.shape[0] // 3
+    margin = int(0.12 * h)
+    b = img[:h, :][margin:-margin, margin:-margin]
+    g = img[h:2*h, :][margin:-margin, margin:-margin]
+    r = img[2*h:3*h, :][margin:-margin, margin:-margin]
+return b, g, r</code>
+                    </pre>
+                </div>
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Step 2: Channel Alignment (NCC & Pyramid)</span><br>
+                    </details>
+                    <span style="color:#444;">The Green and Red channels are automatically aligned to the Blue channel
+                        using normalized cross-correlation (NCC). For large images, a pyramid (coarse-to-fine) approach
+                        is
+                        used to speed up alignment.</span>
+                    <details style="margin-top:0.7em;">
+                        <summary
+                            style="cursor:pointer; font-weight:500; color:#2a5db0; background-color: rgb(236, 244, 250);">
+                            Show Code</summary>
+                        <pre
+                            style="background:#23272e;font-size:0.9rem;padding:0.5em 1em;border-radius:10px;overflow-x:auto;line-height:1.7;margin:0.7em 0 0 0;box-shadow:0 2px 8px rgba(58,123,213,0.08);">
+                                <code class="language-python">
+    def pyramid_align(ref, img, search_range=20, min_size=64):
+        """Recursive pyramid alignment, suitable for large images."""
+        if min(ref.shape) < min_size:
+            return (0, 0), -np.inf
+        # Downsample
+        ref_small = cv2.pyrDown(ref)
+        img_small = cv2.pyrDown(img)
+        # Recursively aligning
+        offset_small, _ = pyramid_align(ref_small, img_small, search_range, min_size)
+        # Upscale to current level
+        offset = (offset_small[0]*2, offset_small[1]*2)
+        best_offset = offset
+        best_score = -np.inf
+        ref_crop = ref[search_range:-search_range, search_range:-search_range]
+        ref_norm = (ref_crop - np.mean(ref_crop)) / (np.std(ref_crop) + 1e-9)
+        for dy in range(offset[0]-2, offset[0]+3):
+            for dx in range(offset[1]-2, offset[1]+3):
+                shifted = np.roll(np.roll(img, dy, axis=0), dx, axis=1)
+                shifted_crop = shifted[search_range:-search_range, search_range:-search_range]
+                shifted_norm = (shifted_crop - np.mean(shifted_crop)) / (np.std(shifted_crop) + 1e-9)
+                score = np.sum(ref_norm * shifted_norm)
+                if score > best_score:
+                    best_score = score
+                    best_offset = (dy, dx)
+        return best_offset, best_score</code>
+                            </pre>
+                    </details>
+                </div>
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Step 3: Do and Find the Best Alignment</span><br>
+                    <span style="color:#444;">Invoke the alignment function for each channel. It should be considered
+                        that the effect varies when you choose different channels to align with. Sometimes the R channel
+                        can match the B channel well, while sometimes the G channel is more aligned with the R channel.
+                        So we should find the best matching.</span>
+                    <details style="margin-top:0.7em;">
+                        <summary
+                            style="cursor:pointer; font-weight:500; color:#2a5db0; background-color: rgb(236, 244, 250);">
+                            Show Code</summary>
+                        <pre
+                            style="background:#23272e;font-size:0.9rem;padding:0.5em 1em;border-radius:10px;overflow-x:auto;line-height:1.7;margin:0.7em 0 0 0;box-shadow:0 2px 8px rgba(58,123,213,0.08);">
+                                <code class="language-python">
+    offset_g2b, score_g2b = pyramid_align(b, g)
+    offset_r2b, score_r2b = pyramid_align(b, r)
+    offset_r2g, score_g2r = pyramid_align(g, r)
+    # Choose best offsets based on scores 
+    if score_g2r > score_r2b:
+        if score_g2b > score_r2b:
+            offset_g = offset_g2b
+            offset_r = (offset_g2b[0] + offset_r2g[0], offset_g2b[1] + offset_r2g[1])
+        else:
+            offset_r = offset_r2b
+            offset_g = (offset_r2b[0] - offset_r2g[0], offset_r2b[1] - offset_r2g[1])
+    else:
+        offset_r = offset_r2b
+        if score_g2b > score_r2b:
+            offset_g = offset_g2b
+        else:
+            offset_g = (offset_r2b[0] - offset_r2g[0], offset_r2b[1] - offset_r2g[1])</code>
+                            </pre>
+                    </details>
+                </div>
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Step 4: Merge and Save</span><br>
+                    <span style="color:#444;">The aligned channels are stacked to form a color image, which is then
+                        saved. I also normalized each channel to the same mean and std before merging, to ensure the
+                        values of lightness and contrast are consistent.</span>
+                    <details style="margin-top:0.7em;">
+                        <summary
+                            style="cursor:pointer; font-weight:500; color:#2a5db0; background-color: rgb(236, 244, 250);">
+                            Show Code</summary>
+                        <pre
+                            style="background:#23272e;font-size:0.9rem;padding:0.5em 1em;border-radius:10px;overflow-x:auto;line-height:1.7;margin:0.7em 0 0 0;box-shadow:0 2px 8px rgba(58,123,213,0.08);">
+                                <code class="language-python">
+    g_aligned = np.roll(np.roll(g, offset_g[0], axis=0), offset_g[1], axis=1)
+    r_aligned = np.roll(np.roll(r, offset_r[0], axis=0), offset_r[1], axis=1)
+    bgr = np.dstack([b, g_aligned, r_aligned])
+    margin = int(0.05 * min(b.shape))
+    bgr = bgr[margin:-margin, margin:-margin]
+    # Make sure each channel has same value of lightness
+    bgr[:,:,0] = normalize_channel(bgr[:,:,0])
+    bgr[:,:,1] = normalize_channel(bgr[:,:,1])
+    bgr[:,:,2] = normalize_channel(bgr[:,:,2])</code>
+                            </pre>
+                    </details>
+                </div>
+                <div style="margin-bottom:0.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Step 5: Display Results</span><br>
+                    <span style="color:#444;">The results are shown below.</span>
+                </div>
+            </div>
+        </section>
+        <section style="margin-bottom: 2.5rem;">
+            <h2 style="color:#3a7bd5; text-align:center; margin-bottom:1.5rem;">Results Display</h2>
+            <div style="display:flex; flex-wrap:wrap; gap:2rem; justify-content:center;">
+                <div style="display:contents">
+                    <div style="text-align:center;">
+                        <img src="./data/results/monastery_result.jpg" alt="monastery_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">monastery_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/cathedral_result.jpg" alt="cathedral_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">cathedral_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/church_result.jpg" alt="church_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">church_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/tobolsk_result.jpg" alt="tobolsk_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">tobolsk_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/emir_result.jpg" alt="emir_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">emir_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/harvesters_result.jpg" alt="harvesters_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">harvesters_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/icon_result.jpg" alt="icon_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">icon_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/italil_result.jpg" alt="italil_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">italil_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/lastochikino_result.jpg" alt="lastochikino_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">lastochikino_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/lugano_result.jpg" alt="lugano_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">lugano_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/melons_result.jpg" alt="melons_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">melons_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/self_portrait_result.jpg" alt="self_portrait_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">self_portrait_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/siren_result.jpg" alt="siren_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">siren_result.jpg</div>
+                    </div>
+                    <div style="text-align:center;">
+                        <img src="./data/results/three_generations_result.jpg" alt="three_generations_result"
+                            style="max-width:320px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                        <div style="margin-top:0.5rem; color:#555;">three_generations_result.jpg</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="./main.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+
+</html>
