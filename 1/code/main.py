@@ -83,13 +83,14 @@ def process_file(filepath):
     bgr[:,:,0] = normalize_channel(bgr[:,:,0])
     bgr[:,:,1] = normalize_channel(bgr[:,:,1])
     bgr[:,:,2] = normalize_channel(bgr[:,:,2])
-    outname = './results/' + os.path.splitext(filepath)[0] + '_result.jpg'
+    outname = './results/' + os.path.splitext(os.path.basename(filepath))[0] + '_result.jpg'
     cv2.imwrite(outname, bgr)
     print(f"{filepath} -> {outname}, G offset: {offset_g}, R offset: {offset_r}")
 
 if __name__ == '__main__':
     # Process all files in current directory
-    for ext in ("*.jpg", "*.tif"):
+    os.makedirs('./results', exist_ok=True)
+    for ext in ("./data/*.jpg", "./data/*.tif"):
         print(f"Processing files with extension: {ext}")
         for file in glob.glob(ext):
             print(f"Processing file: {file}")

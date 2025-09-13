@@ -41,12 +41,13 @@
                 <div style="margin-bottom:1.5em;">
                     <span style="font-weight:600; color:#3a7bd5;">Step 1: Split BGR Channels</span><br>
                     <span style="color:#444;">The image is split into three equal parts, corresponding to the B, G, and
-                        <details style="margin-top:0.7em;">
-                            <summary
-                                style="cursor:pointer; font-weight:500; color:#2a5db0; background-color: rgb(236, 244, 250);">
-                                Show Code</summary>
-                            <pre
-                                style="background:#23272e;font-size:0.9rem;padding:0.5em 1em;border-radius:10px;overflow-x:auto;line-height:1.7;margin:0.7em 0 0 0;box-shadow:0 2px 8px rgba(58,123,213,0.08);">
+                        R. Then, also a small margin is cropped to remove potential borders.</span>
+                    <details style="margin-top:0.7em;">
+                        <summary
+                            style="cursor:pointer; font-weight:500; color:#2a5db0; background-color: rgb(236, 244, 250);">
+                            Show Code</summary>
+                        <pre
+                            style="background:#23272e;font-size:0.9rem;padding:0.5em 1em;border-radius:10px;overflow-x:auto;line-height:1.7;margin:0.7em 0 0 0;box-shadow:0 2px 8px rgba(58,123,213,0.08);">
                                 <code class="language-python">
 def split_bgr(img):
     h = img.shape[0] // 3
