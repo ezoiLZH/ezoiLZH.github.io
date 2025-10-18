@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 3B</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <!-- highlight.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+</head>
+
+<body>
+    <!-- <div class="parallax-bg"></div> -->
+    <header>
+        <h1 style="color:#3a7bd5; font-family: 'Montserrat', sans-serif; font-size: 72px;">Project 3B</h1>
+        <p style="color:#2f2f2f; font-size: 30px;">
+            FEATURE MATCHING for AUTOSTITCHING
+        </p>
+    </header>
+    <div class="main-content-area">
+        <section style="margin-bottom: 2.5rem;">
+            <h2 style="color:#2a5db0; text-align:center; margin-bottom:1.2rem; letter-spacing:1px; font-size:2.1rem;">
+                Part B: Feature Matching for Autostitching</h2>
+            <div
+                style="color:#2d3540; font-size:1.13rem; max-width:900px; margin:0 auto 2.2rem auto; line-height:1.85; background:linear-gradient(90deg,#fafdff 60%,#eaf1fa 100%); border-radius:18px; padding:1.5rem 2.2rem; box-shadow:0 4px 24px rgba(58,123,213,0.10); border-left:6px solid #3a7bd5;">
+
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Part B.1: Harris Corner Detection</span><br>
+                    <span style="color:#444;">
+                        <strong>Description:</strong> Implemented Harris corner detection to identify interest points in images. Also implemented Adaptive Non-Maximal Suppression (ANMS) to select a well-distributed subset of corners.<br>
+                        <strong>My approach:</strong> Used the provided harris.py implementation for corner detection. For ANMS, implemented the algorithm to select corners with good spatial distribution by maximizing the minimum distance to stronger corners.<br>
+                        <strong>Results:</strong> The following shows Harris corners overlaid on images, with and without ANMS.
+                    </span>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group1_harris_center.jpg" alt="Harris Corners - Center Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Harris Corners - Center Image</div>
+                            </div>
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group1_harris_side2.jpg" alt="Harris Corners - Side Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Harris Corners - Side Image</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group1_anms_center.jpg" alt="ANMS Corners - Center Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">ANMS Corners - Center Image</div>
+                            </div>
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group1_anms_side2.jpg" alt="ANMS Corners - Side Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">ANMS Corners - Side Image</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group2_harris_center.jpg" alt="Harris Corners - Center Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Harris Corners - Center Image (Group 2)</div>
+                            </div>
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group2_anms_center.jpg" alt="ANMS Corners - Center Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">ANMS Corners - Center Image (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Part B.2: Feature Descriptor Extraction</span><br>
+                    <span style="color:#444;">
+                        <strong>Description:</strong> Extracted feature descriptors for each corner point. Following the paper, we extract 8x8 descriptors from 40x40 windows with bias/gain normalization.<br>
+                        <strong>My approach:</strong> For each corner point, sampled a 40x40 window, applied Gaussian blur, resized to 8x8, and normalized to zero mean and unit variance.<br>
+                        <strong>Results:</strong> Example extracted feature patches shown below.
+                    </span>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group1_patches_center.jpg" alt="Feature Patches - Center Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Feature Patches - Center Image</div>
+                            </div>
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group1_patches_side2.jpg" alt="Feature Patches - Side Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Feature Patches - Side Image</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group2_patches_center.jpg" alt="Feature Patches - Center Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Feature Patches - Center Image (Group 2)</div>
+                            </div>
+                            <div style="text-align:center; width: 45%;">
+                                <img src="./code/results/group2_patches_side2.jpg" alt="Feature Patches - Side Image"
+                                    style="max-width:400px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Feature Patches - Side Image (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Part B.3: Feature Matching</span><br>
+                    <span style="color:#444;">
+                        <strong>Description:</strong> Matched feature descriptors between image pairs using Lowe's ratio test to identify good matches.<br>
+                        <strong>My approach:</strong> For each descriptor in one image, found the two nearest neighbors in the other image and used the ratio of their distances as a threshold to determine good matches.<br>
+                        <strong>Results:</strong> Feature matches between image pairs shown below.
+                    </span>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group1_matches_center_vs_side2.jpg" alt="Feature Matches"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Feature Matches</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group2_matches_center_vs_side2.jpg" alt="Feature Matches"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Feature Matches (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Part B.4: RANSAC for Robust Homography</span><br>
+                    <span style="color:#444;">
+                        <strong>Description:</strong> Used RANSAC to compute a robust homography estimate from the feature matches, then applied it to create image mosaics.<br>
+                        <strong>My approach:</strong> Implemented 4-point RANSAC to estimate homography. Randomly sampled 4 matching point pairs, computed the homography, and counted inliers. Re-estimated using all inliers for the final homography.<br>
+                        <strong>Results:</strong> Inlier matches and resulting mosaics shown below.
+                    </span>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group1_inliers_center_vs_side2.jpg" alt="Inlier Matches"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Inlier Matches</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group1_panorama_center_vs_side2.jpg" alt="Panorama Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Panorama Result</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group2_inliers_center_vs_side2.jpg" alt="Inlier Matches"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Inlier Matches (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group2_panorama_center_vs_side2.jpg" alt="Panorama Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Panorama Result (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group4_panorama_center_vs_side2.jpg" alt="Panorama Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Panorama Result (Group 4)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group5_panorama_center_vs_side2.jpg" alt="Panorama Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Panorama Result (Group 5)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Automatic vs Manual Stitching Comparison</span><br>
+                    <span style="color:#444;">
+                        <strong>Description:</strong> Comparison between automatically stitched panoramas (using feature matching) and manually stitched panoramas (from Part A).<br>
+                        <strong>My approach:</strong> Used the same image sets for both automatic and manual stitching to provide a fair comparison.<br>
+                        <strong>Results:</strong> Comparison shown below.
+                    </span>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="../3A/code/results/1_mosaic_bilinear.jpg" alt="Manual Stitching Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Manual Stitching Result (Group 1)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group1_panorama_center_vs_side2.jpg" alt="Automatic Stitching Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Automatic Stitching Result (Group 1)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="../3A/code/results/2_mosaic_bilinear.jpg" alt="Manual Stitching Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Manual Stitching Result (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vb">
+                        <div class=" hb">
+                            <div style="text-align:center; width: 90%;">
+                                <img src="./code/results/group2_panorama_center_vs_side2.jpg" alt="Automatic Stitching Result"
+                                    style="max-width:800px; width:100%; border-radius:12px; box-shadow:0 2px 12px rgba(58,123,213,0.12);">
+                                <div style="margin-top: 0;color:#555;">Automatic Stitching Result (Group 2)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5em;">
+                    <span style="font-weight:600; color:#3a7bd5;">Part B.5: Summary</span><br>
+                    <span style="color:#444;">
+                        <strong>Project completion status:</strong><br>
+                        1. Implemented Harris corner detection and ANMS for feature point selection<br>
+                        2. Extracted 8x8 feature descriptors from 40x40 windows with normalization<br>
+                        3. Implemented feature matching with Lowe's ratio test<br>
+                        4. Implemented 4-point RANSAC for robust homography estimation<br>
+                        5. Created automatic image mosaics from unaligned images<br><br>
+
+                        <strong>Problems encountered and solutions:</strong><br>
+                        1. Feature matching sometimes produced false matches. Solved by using Lowe's ratio test to filter matches.<br>
+                        2. Homography estimation was sensitive to outliers. Solved by using RANSAC to find the best set of inliers.<br>
+                        3. Some images failed to stitch due to insufficient matches. Improved by adjusting ANMS parameters to get more features.<br><br>
+
+                        <strong>Comparison with manual stitching:</strong><br>
+                        Manual stitching requires user interaction to select corresponding points, which is time-consuming and error-prone.<br>
+                        Automatic stitching using feature matching is much faster and more robust, especially for multiple images.<br>
+                        However, automatic methods may fail when images have repetitive patterns or low texture.<br><br>
+
+                        <strong>Future improvements:</strong><br>
+                        1. Add multi-scale processing for corner detection<br>
+                        2. Implement rotation invariance for feature descriptors<br>
+                        3. Add panorama recognition from unordered image sets
+                    </span>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>
