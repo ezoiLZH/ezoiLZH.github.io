@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS180/280A: NeRF Project Results</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            color: #3498db;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-label {
+            display: block;
+            margin-top: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .description {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-left: 4px solid #3498db;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            background: #fff9c4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background: #2c3e50;
+            color: white;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+
+            .grid,
+            .grid-2,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Neural Radiance Fields (NeRF) Project</h1>
+        <div class="subtitle">CS180/280A Computer Vision Assignment</div>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <h2 class="section-title">Part 0: Camera Calibration and 3D Scanning</h2>
+            <p>In this part, we calibrated a camera using a checkerboard pattern and captured a 3D scan of an object.
+                The visualization below shows the camera frustums captured during the scanning process.</p>
+
+            <div class="grid-2">
+                <div class="image-container">
+                    <img src="results/render1.png" alt="Camera Frustums Visualization 1">
+                    <span class="image-label">Camera Frustums Visualization - View 1</span>
+                </div>
+                <div class="image-container">
+                    <img src="results/render2.png" alt="Camera Frustums Visualization 2">
+                    <span class="image-label">Camera Frustums Visualization - View 2</span>
+                </div>
+            </div>
+
+            <div class="description">
+                <p><strong>Technical Details:</strong> We used OpenCV to calibrate the camera, obtaining intrinsic
+                    parameters including focal length and principal point. The extrinsic parameters (camera positions
+                    and orientations) were computed from the captured images of the object. The visualization shows how
+                    multiple camera views are used to capture a 3D scene from different angles.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Part 1: Neural Field Fitting to 2D Image</h2>
+
+            <h3>Model Architecture</h3>
+            <div class="description">
+                <p>We implemented a neural field model with the following architecture:</p>
+                <ul>
+                    <li><span class="highlight">Layers:</span> 4 hidden layers</li>
+                    <li><span class="highlight">Width:</span> 256 neurons per layer</li>
+                    <li><span class="highlight">Positional Encoding:</span> 10 frequency bands for coordinates</li>
+                    <li><span class="highlight">Learning Rate:</span> 5e-4 with Adam optimizer</li>
+                    <li><span class="highlight">Activation:</span> ReLU for hidden layers, Sigmoid for output</li>
+                </ul>
+            </div>
+
+            <h3>Training Progression</h3>
+            <div class="grid">
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_iter_100.png" alt="Iteration 100">
+                    <span class="image-label">Iteration 100</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_iter_200.png" alt="Iteration 200">
+                    <span class="image-label">Iteration 200</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_iter_500.png" alt="Iteration 500">
+                    <span class="image-label">Iteration 500</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_iter_1000.png" alt="Iteration 1000">
+                    <span class="image-label">Iteration 1000</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_iter_2000.png" alt="Iteration 2000">
+                    <span class="image-label">Iteration 2000</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/example.jpg" alt="Original Image">
+                    <span class="image-label">Original Image</span>
+                </div>
+            </div>
+            <h3>Training History</h3>
+            <div class="image-container">
+                <img src="part1/results/training_history.png" alt="PSNR Training Curve">
+                <span class="image-label">PSNR vs Training Iterations</span>
+            </div>
+
+            <h3>Training Progression</h3>
+            <div class="grid">
+                <div class="image-container">
+                    <img src="part1/results_custom/reconstruction_iter_100.png" alt="Iteration 100">
+                    <span class="image-label">Iteration 100</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results_custom/reconstruction_iter_200.png" alt="Iteration 200">
+                    <span class="image-label">Iteration 200</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results_custom/reconstruction_iter_500.png" alt="Iteration 500">
+                    <span class="image-label">Iteration 500</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results_custom/reconstruction_iter_1000.png" alt="Iteration 1000">
+                    <span class="image-label">Iteration 1000</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results_custom/reconstruction_iter_2000.png" alt="Iteration 2000">
+                    <span class="image-label">Iteration 2000</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/custom.jpg" alt="Original Image">
+                    <span class="image-label">Original Image</span>
+                </div>
+            </div>
+
+            <h3>Hyperparameter Comparison</h3>
+            <div class="grid-2">
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_low_freq_narrow.png" alt="Frequency 3, Width 64">
+                    <span class="image-label">Freq: 3, Width: 64</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_low_freq_wide.png" alt="Frequency 3, Width 256">
+                    <span class="image-label">Freq: 3, Width: 256</span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_high_freq_narrow.png" alt="Frequency 10, Width 64">
+                    <span class="image-label">Freq: 10, Width: 64</span>
+                </div>
+                <div class="image-container">
+                    <img src="part1/results/reconstruction_high_freq_wide.png" alt="Frequency 10, Width 256">
+                    <span class="image-label">Freq: 10, Width: 256</span>
+                </div>
+            </div>
+
+            <h3>Training PSNR Curve</h3>
+            <div class="image-container">
+                <img src="part1/hyperparameter_comparison.png" alt="PSNR Training Curve">
+                <span class="image-label">PSNR vs Training Iterations</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Part 2: Neural Radiance Field from Multi-view Images</h2>
+
+            <h3>Implementation Overview</h3>
+            <div class="description">
+                <p>Our implementation consists of several key components:</p>
+                <ol>
+                    <li><strong>Ray Generation:</strong> Convert pixel coordinates to rays in 3D space using camera
+                        parameters</li>
+                    <li><strong>Sampling:</strong> Sample points along rays with hierarchical sampling strategy</li>
+                    <li><strong>NeRF Network:</strong> 8-layer MLP with positional encoding for coordinate and view
+                        direction</li>
+                    <li><strong>Volume Rendering:</strong> Implement volume rendering equation to compute pixel colors
+                    </li>
+                </ol>
+            </div>
+
+            <h3>Rays and Samples Visualization</h3>
+            <div class="grid-2">
+                <div class="image-container">
+                    <img src="results/render_part2_2.png" alt="Rays Visualization"
+                        style="max-height: 300px; object-fit: contain;">
+                    <span class="image-label">Rays and Samples Visualization (Up to 100 rays)</span>
+                </div>
+                <div class="image-container">
+                    <img src="results/render_part2.png" alt="Camera Rays Visualization">
+                    <span class="image-label">Camera Frustums with Rays</span>
+                </div>
+            </div>
+
+            <h3>Training Progression</h3>
+            <div class="grid-4">
+                <div class="image-container">
+                    <img src="part2/rendered_images/epoch_100.png" alt="Epoch 100">
+                    <span class="image-label">Epoch 100</span>
+                </div>
+                <div class="image-container">
+                    <img src="part2/rendered_images/epoch_300.png" alt="Epoch 300">
+                    <span class="image-label">Epoch 300</span>
+                </div>
+                <div class="image-container">
+                    <img src="part2/rendered_images/epoch_500.png" alt="Epoch 500">
+                    <span class="image-label">Epoch 500</span>
+                </div>
+                <div class="image-container">
+                    <img src="part2/rendered_images/epoch_999.png" alt="Epoch 1000">
+                    <span class="image-label">Epoch 1000</span>
+                </div>
+            </div>
+
+            <h3>Validation PSNR Curve</h3>
+            <div class="image-container">
+                <img src="part2/training_history.png" alt="Training History">
+                <span class="image-label">Training and Validation PSNR</span>
+            </div>
+
+            <h3>Spherical Rendering Video</h3>
+            <div class="image-container">
+                <img src="part2/spherical_rendering.gif" alt="Spherical Rendering GIF">
+                <span class="image-label">Lego Scene Novel View Synthesis</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Part 2.6: Training with Custom Data</h2>
+
+            <h3>Implementation Details</h3>
+            <div class="description">
+                <p>To train on our custom data, we made several modifications to handle large images and memory
+                    constraints:</p>
+                <ul>
+                    <li><strong>Image Resizing:</strong> Resized images to 400px height to manage memory usage</li>
+                    <li><strong>Memory Optimization:</strong> Implemented chunked processing and CPU-GPU memory
+                        management</li>
+                    <li><strong>Hyperparameters:</strong>
+                        <ul>
+                            <li>Near plane: 0.02, Far plane: 0.5 (adjusted for real-world scale)</li>
+                            <li>Batch size: 512 rays per iteration</li>
+                            <li>Samples per ray: 32</li>
+                            <li>Learning rate: 5e-4</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>Training Loss Curve</h3>
+            <div class="image-container">
+                <img src="part2.6/training_history.png" alt="Custom Training History">
+                <span class="image-label">Training Loss and PSNR for Custom Data</span>
+            </div>
+
+            <h3>Intermediate Renders</h3>
+            <div class="grid">
+                <div class="image-container">
+                    <img src="part2.6/my_rendered_images/epoch_1.png" alt="Epoch 1">
+                    <span class="image-label">Epoch 1</span>
+                </div>
+                <div class="image-container">
+                    <img src="part2.6/my_rendered_images/epoch_100.png" alt="Epoch 100">
+                    <span class="image-label">Epoch 100</span>
+                </div>
+                <div class="image-container">
+                    <img src="part2.6/my_rendered_images/epoch_300.png" alt="Epoch 300">
+                    <span class="image-label">Epoch 300</span>
+                </div>
+                <div class="image-container">
+                    <img src="part2.6/my_rendered_images/epoch_1000.png" alt="Epoch 1000">
+                    <span class="image-label">Epoch 1000</span>
+                </div>
+            </div>
+
+            <h3>Novel View Synthesis</h3>
+            <div class="image-container">
+                <img src="part2.6/my_novel_view.gif" alt="Custom Novel View GIF">
+                <span class="image-label">Novel Views of Custom Object</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Technical Challenges and Solutions</h2>
+            <div class="description">
+                <p>During the implementation, we encountered several challenges:</p>
+                <ol>
+                    <li><strong>Memory Management:</strong> High-resolution images caused CUDA out-of-memory errors. We
+                        solved this by:
+                        <ul>
+                            <li>Resizing images to manageable dimensions</li>
+                            <li>Implementing chunked processing for ray sampling</li>
+                            <li>Moving non-essential data to CPU memory</li>
+                        </ul>
+                    </li>
+                    <li><strong>Ray Generation:</strong> Converting pixel coordinates to 3D rays required careful
+                        handling of coordinate systems and camera parameters</li>
+                    <li><strong>Training Stability:</strong> Ensuring stable training required careful tuning of
+                        learning rates and batch sizes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>CS180/280A Computer Vision Project | Neural Radiance Fields Implementation</p>
+        <p>© 2025</p>
+    </footer>
+</body>
+
+</html>
