@@ -154,9 +154,6 @@ conda-env.yml
 *.tar.gz
 
 # Rendered images and outputs
-rendered_images/
-spherical_rendering/
-training_history.png
 rays_visualization_data.npy
 
 # Model checkpoints
