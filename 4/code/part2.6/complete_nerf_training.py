@@ -6,6 +6,7 @@ from tqdm import tqdm
 import os
 from PIL import Image
 import os
+import cv2
 
 # 解决OpenMP库冲突问题
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -284,6 +285,19 @@ def train_nerf_with_visualization():
     model = NeRF(coord_frequencies=10, dir_frequencies=4, hidden_channels=256, num_layers=8)
     model = model.to(device)
     
+    # Check if a pre-trained model exists and load it
+    model_path = "nerf_my_model.pth"
+    if os.path.exists(model_path):
+        print(f"Loading pre-trained model from {model_path}")
+        try:
+            model.load_state_dict(torch.load(model_path, map_location=device))
+            print("Pre-trained model loaded successfully!")
+        except Exception as e:
+            print(f"Failed to load pre-trained model: {e}")
+            print("Training from scratch...")
+    else:
+        print("No pre-trained model found. Training from scratch.")
+    
     # Optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
     
@@ -291,7 +305,7 @@ def train_nerf_with_visualization():
     N_rays = 10000  # Batch size in terms of rays
     N_samples = 64  # Number of samples per ray
     near = 0.005
-    far = 1
+    far = 0.5
     step_size = (far - near) / N_samples
     N_epochs = 3000
     
@@ -412,9 +426,13 @@ def train_nerf_with_visualization():
                 plt.legend()
                 
                 plt.tight_layout()
-                plt.savefig('training_history.png', dpi=300, bbox_inches='tight')
+                plt.savefig('my_training_history.png', dpi=300, bbox_inches='tight')
                 plt.close()
-                print("Training history saved to training_history.png")
+                print("Training history saved to my_training_history.png")
+
+                # Save model
+                torch.save(model.state_dict(), "nerf_my_model.pth")
+                print("Model saved to nerf_my_model.pth")
 
         # Save rendered images at specific epochs
         if epoch in save_epochs or epoch == N_epochs - 1:
@@ -425,6 +443,7 @@ def train_nerf_with_visualization():
                 rendered_images[epoch] = val_image.cpu().numpy()
 
                 image_uint8 = (np.clip(rendered_images[epoch], 0, 1) * 255).astype(np.uint8)
+                image_uint8 = cv2.cvtColor(image_uint8, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
                 img = Image.fromarray(image_uint8)
                 img.save(f'rendered_images/epoch_{epoch}.png')
     
@@ -432,10 +451,6 @@ def train_nerf_with_visualization():
     print(f"  Final Train Loss: {loss.item():.6f}")
     print(f"  Final Train PSNR: {psnr_value.item():.2f} dB")
     print(f"  Final Val PSNR: {val_psnr.item():.2f} dB")
-    
-    # Save model
-    torch.save(model.state_dict(), "nerf_my_model.pth")
-    print("Model saved to nerf_my_model.pth")
     
     # Generate spherical rendering video
     print("\nGenerating spherical rendering video...")
@@ -448,6 +463,7 @@ def train_nerf_with_visualization():
             rendered_image = render_image(model, c2w, K, H, W, near, far, N_samples, device)
             image_np = rendered_image.cpu().numpy()
             image_uint8 = (np.clip(image_np, 0, 1) * 255).astype(np.uint8)
+            image_uint8 = cv2.cvtColor(image_uint8, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
             rendered_frames.append(image_uint8)
             
             # Save individual frames
@@ -463,7 +479,7 @@ def train_nerf_with_visualization():
             'spherical_rendering.gif',
             save_all=True,
             append_images=frames_for_gif[1:],
-            duration=100,  # milliseconds per frame
+            duration=500,  # milliseconds per frame
             loop=0
         )
         print("Spherical rendering GIF saved to spherical_rendering.gif")

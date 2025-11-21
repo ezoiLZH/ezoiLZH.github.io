@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 180 Project 5A - Diffusion Models</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 50px 40px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 40px;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .section h3 {
+            color: #555;
+            font-size: 1.3em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .subsection {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .subsection p {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-gallery-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-gallery-2 .image-card img {
+            max-height: 300px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .image-gallery-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-gallery-3 .image-card img {
+            max-height: 250px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .image-gallery-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-gallery-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-gallery-6 {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-card-caption {
+            padding: 15px;
+            background: white;
+            color: #333;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-container-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-container-2 .comparison-item img {
+            max-height: 300px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .comparison-container-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-container-3 .comparison-item img {
+            max-height: 250px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .comparison-container-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-container-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-container-6 {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-container-7 {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .comparison-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comparison-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            flex: 1;
+        }
+
+        .comparison-item-label {
+            padding: 12px;
+            background: white;
+            color: #555;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .analysis-box {
+            background: #e8f4f8;
+            border-left: 4px solid #0288d1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .analysis-box h4 {
+            color: #0288d1;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .analysis-box p {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .analysis-box ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .analysis-box li {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .info-banner {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #0c5460;
+        }
+
+        .info-banner strong {
+            color: #0c5460;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        footer {
+            background: #f8f9fa;
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 40px 20px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .section h2 {
+                font-size: 1.5em;
+            }
+
+            .subsection {
+                padding: 15px;
+            }
+
+            .image-gallery-2,
+            .image-gallery-3,
+            .image-gallery-4,
+            .image-gallery-5,
+            .image-gallery-6,
+            .comparison-container-2,
+            .comparison-container-3,
+            .comparison-container-4,
+            .comparison-container-5,
+            .comparison-container-6,
+            .comparison-container-7 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .image-gallery-2 .image-card img,
+            .image-gallery-3 .image-card img,
+            .comparison-container-2 .comparison-item img,
+            .comparison-container-3 .comparison-item img {
+                max-height: none;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 CS 180 Project 5A</h1>
+            <p>Diffusion Models: Sampling Loops and Applications</p>
+        </header>
+
+        <div class="content">
+            <!-- Part 0: Setup -->
+            <div class="section">
+                <h2>📋 Project Overview</h2>
+                <div class="subsection">
+                    <p>
+                        In this project, we explore diffusion models using the DeepFloyd IF model. We implement sampling
+                        loops from scratch,
+                        learn how diffusion models work through the forward and reverse processes, and apply these
+                        techniques to various
+                        image generation and editing tasks.
+                    </p>
+                    <p>
+                        This page showcases the results from Parts 1.1 through 1.7, demonstrating the progression from
+                        basic noise addition
+                        to advanced image editing techniques using diffusion models.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Part 1.0: Prompt Embeddings -->
+            <div class="section">
+                <h2>🎯 Part 0: Model Setup and Prompts</h2>
+                <div class="subsection">
+                    <h3>📝 Text Prompts Used</h3>
+                    <p>We generated text embeddings for the following creative prompts:</p>
+                    <div class="analysis-box">
+                        <ul>
+                            <li>Cyberpunk Tokyo night market, neon lights, rainy streets, futuristic</li>
+                            <li>Bioluminescent jellyfish in deep ocean, coral reef, magical lighting</li>
+                            <li>Van Gogh style starry night over a field of sunflowers</li>
+                            <li>A high quality photo (null/unconditional prompt)</li>
+                            <li>Empty string (unconditional prompt for CFG)</li>
+                        </ul>
+                    </div>
+                    <div class="seed-info">
+                        🌱 Random Seed Used: <strong>100</strong> (for reproducibility)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.1: Forward Process -->
+            <div class="section">
+                <h2>1️⃣.1️⃣ Forward Process: Adding Noise</h2>
+                <div class="subsection">
+                    <h3>📖 Mathematical Foundation</h3>
+                    <p>
+                        The forward process adds noise to a clean image using the formula:
+                        <br><strong>x_t = √(ᾱ_t) · x_0 + √(1 - ᾱ_t) · ε</strong>
+                        <br>where ε ~ N(0, I) and ᾱ_t are learned noise coefficients.
+                    </p>
+                </div>
+
+                <div class="subsection">
+                    <h3>🖼️ Results: Campanile at Different Noise Levels</h3>
+                    <p>The test image (UC Berkeley Campanile) at noise levels t = [250, 500, 750]:</p>
+                    <div class="comparison-container-4">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_250.png" alt="Campanile at noise level 250">
+                            <div class="comparison-item-label">t=250<br>(Low Noise)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_500.png" alt="Campanile at noise level 500">
+                            <div class="comparison-item-label">t=500<br>(Medium Noise)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_750.png" alt="Campanile at noise level 750">
+                            <div class="comparison-item-label">t=750<br>(High Noise)</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            As t increases, the image becomes progressively noisier. At t=250, the image structure is
+                            still recognizable.
+                            At t=500, most details are obscured by noise. At t=750, the image is nearly pure noise with
+                            only faint hints
+                            of the original structure. This demonstrates the forward diffusion process effectively.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.2: Classical Denoising -->
+            <div class="section">
+                <h2>1️⃣.2️⃣ Classical Denoising: Gaussian Blur</h2>
+                <div class="subsection">
+                    <h3>📊 Comparison: Noisy vs. Gaussian Blur Denoised</h3>
+                    <p>Classical image processing techniques like Gaussian blur have limited effectiveness on highly
+                        noisy images:</p>
+
+                    <p><strong>Noise Level t=250 (Low Noise)</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_250.png" alt="Noisy at 250">
+                            <div class="comparison-item-label">Original Noisy</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="denoised_noise_level_250.png" alt="Gaussian blur denoised at 250">
+                            <div class="comparison-item-label">Gaussian Blur Denoised</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Noise Level t=500 (Medium Noise)</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_500.png" alt="Noisy at 500">
+                            <div class="comparison-item-label">Original Noisy</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="denoised_noise_level_500.png" alt="Gaussian blur denoised at 500">
+                            <div class="comparison-item-label">Gaussian Blur Denoised</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Noise Level t=750 (High Noise)</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_750.png" alt="Noisy at 750">
+                            <div class="comparison-item-label">Original Noisy</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="denoised_noise_level_750.png" alt="Gaussian blur denoised at 750">
+                            <div class="comparison-item-label">Gaussian Blur Denoised</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            Gaussian blur provides marginal improvements at low noise levels but fails catastrophically
+                            at higher noise levels.
+                            The blur operator simply smooths the noise without effectively reconstructing the image
+                            structure. This demonstrates
+                            why classical denoising methods are insufficient for highly noisy images - we need more
+                            sophisticated deep learning approaches.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.3: One Step Denoising -->
+            <div class="section">
+                <h2>1️⃣.3️⃣ One-Step Denoising with UNet</h2>
+                <div class="subsection">
+                    <h3>🧠 Using Pre-trained Diffusion UNet</h3>
+                    <p>
+                        We use the pre-trained DeepFloyd UNet to estimate noise in noisy images. By predicting the noise
+                        and removing it
+                        using the mathematical formula, we can recover cleaner images in a single step.
+                    </p>
+
+                    <p><strong>Results: Original → Noisy → UNet Denoised</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_250.png" alt="Noisy at 250">
+                            <div class="comparison-item-label">Noisy (t=250)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="denoised_unet_level_250.png" alt="UNet denoised at 250">
+                            <div class="comparison-item-label">UNet Denoised (t=250)</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_500.png" alt="Noisy at 500">
+                            <div class="comparison-item-label">Noisy (t=500)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="denoised_unet_level_500.png" alt="UNet denoised at 500">
+                            <div class="comparison-item-label">UNet Denoised (t=500)</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="noise_level_750.png" alt="Noisy at 750">
+                            <div class="comparison-item-label">Noisy (t=750)</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="denoised_unet_level_750.png" alt="UNet denoised at 750">
+                            <div class="comparison-item-label">UNet Denoised (t=750)</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            The pre-trained UNet provides significantly better results than Gaussian blur! Even at high
+                            noise levels (t=750),
+                            it can recover recognizable image features. However, performance degrades as noise
+                            increases. The UNet effectively
+                            leverages its learned knowledge of natural images to project noisy images back onto the
+                            "natural image manifold."
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.4: Iterative Denoising -->
+            <div class="section">
+                <h2>1️⃣.4️⃣ Iterative Denoising: DDPM Sampling</h2>
+                <div class="subsection">
+                    <h3>🔄 Progressive Denoising Loop</h3>
+                    <p>
+                        Instead of denoising in one step, we can iteratively denoise by skipping timesteps.
+                        This allows the model to gradually refine its prediction, resulting in much better quality
+                        images.
+                    </p>
+
+                    <p><strong>Denoising Progression (every 5 steps shown):</strong></p>
+                    <div class="image-gallery-6">
+                        <div class="image-card">
+                            <img src="iterative_denoised_image_step_0.png" alt="Step 0">
+                            <div class="image-card-caption">Step 0 (Start)</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="iterative_denoised_image_step_5.png" alt="Step 5">
+                            <div class="image-card-caption">Step 5</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="iterative_denoised_image_step_10.png" alt="Step 10">
+                            <div class="image-card-caption">Step 10</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="iterative_denoised_image_step_15.png" alt="Step 15">
+                            <div class="image-card-caption">Step 15</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="iterative_denoised_image_step_20.png" alt="Step 20">
+                            <div class="image-card-caption">Step 20</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="iterative_denoised_image.png" alt="Final Result">
+                            <div class="image-card-caption">Final Result</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Final Comparison: Three Denoising Methods</strong></p>
+                    <div class="comparison-container-5">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="original_noisy_image.png" alt="Original Noisy">
+                            <div class="comparison-item-label">Original Noisy</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="blur_filtered_image.png" alt="Gaussian Blur">
+                            <div class="comparison-item-label">Gaussian Blur</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="one_step_denoised_image.png" alt="UNet One-Step">
+                            <div class="comparison-item-label">UNet One-Step</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="iterative_denoised_image.png" alt="DDPM Iterative">
+                            <div class="comparison-item-label">DDPM Iterative</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            <strong>Iterative denoising dramatically outperforms single-step methods!</strong> By
+                            gradually removing noise
+                            through 33 denoising steps, we recover the original image with remarkable quality and
+                            detail. The comparison shows:
+                        </p>
+                        <ul>
+                            <li><strong>Gaussian Blur:</strong> Merely smooths the image without understanding structure
+                            </li>
+                            <li><strong>One-Step UNet:</strong> Captures main features but lacks detail refinement</li>
+                            <li><strong>Iterative DDPM:</strong> Progressively refines the image, achieving near-perfect
+                                reconstruction</li>
+                        </ul>
+                        <p>
+                            This demonstrates the power of the DDPM algorithm and why iterative denoising is fundamental
+                            to modern diffusion models.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.5: Diffusion Sampling -->
+            <div class="section">
+                <h2>1️⃣.5️⃣ Unconditional Image Generation</h2>
+                <div class="subsection">
+                    <h3>🎲 Sampling from Pure Noise</h3>
+                    <p>
+                        We can generate images from scratch by starting with pure noise and iteratively denoising.
+                        Without classifier-free guidance, results are reasonable but lack strong coherence.
+                    </p>
+
+                    <p><strong>Five Pure Noise Samples</strong></p>
+                    <div class="image-gallery-5">
+                        <div class="image-card">
+                            <img src="pure_noise_sample_1.png" alt="Pure Noise Sample 1">
+                            <div class="image-card-caption">Pure Noise Sample 1</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="pure_noise_sample_2.png" alt="Pure Noise Sample 2">
+                            <div class="image-card-caption">Pure Noise Sample 2</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="pure_noise_sample_3.png" alt="Pure Noise Sample 3">
+                            <div class="image-card-caption">Pure Noise Sample 3</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="pure_noise_sample_4.png" alt="Pure Noise Sample 4">
+                            <div class="image-card-caption">Pure Noise Sample 4</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="pure_noise_sample_5.png" alt="Pure Noise Sample 5">
+                            <div class="image-card-caption">Pure Noise Sample 5</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Five Generated Samples (Prompt: "a high quality photo")</strong></p>
+                    <div class="image-gallery-5">
+                        <div class="image-card">
+                            <img src="generated_image_sample_1.png" alt="Generated Sample 1">
+                            <div class="image-card-caption">Generated Sample 1</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="generated_image_sample_2.png" alt="Generated Sample 2">
+                            <div class="image-card-caption">Generated Sample 2</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="generated_image_sample_3.png" alt="Generated Sample 3">
+                            <div class="image-card-caption">Generated Sample 3</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="generated_image_sample_4.png" alt="Generated Sample 4">
+                            <div class="image-card-caption">Generated Sample 4</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="generated_image_sample_5.png" alt="Generated Sample 5">
+                            <div class="image-card-caption">Generated Sample 5</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            These unconditional samples show that the diffusion model can generate reasonable-looking
+                            images,
+                            but they lack specific semantic content. This is expected since we only use the weak "a high
+                            quality photo"
+                            prompt. The images appear somewhat blurry and lack fine details, which will be addressed by
+                            classifier-free guidance in the next section.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.6: Classifier-Free Guidance -->
+            <div class="section">
+                <h2>1️⃣.6️⃣ Classifier-Free Guidance (CFG)</h2>
+                <div class="subsection">
+                    <h3>🎯 Enhanced Generation with Guidance</h3>
+                    <p>
+                        Classifier-Free Guidance uses the formula: <strong>ε = ε_u + γ(ε_c - ε_u)</strong> where γ=7.
+                        This significantly improves image quality and coherence.
+                    </p>
+
+                    <p><strong>Five Generated Samples with CFG (γ=7)</strong></p>
+                    <div class="image-gallery-5">
+                        <div class="image-card">
+                            <img src="cfg_generated_image_sample_1.png" alt="CFG Sample 1">
+                            <div class="image-card-caption">CFG Sample 1</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="cfg_generated_image_sample_2.png" alt="CFG Sample 2">
+                            <div class="image-card-caption">CFG Sample 2</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="cfg_generated_image_sample_3.png" alt="CFG Sample 3">
+                            <div class="image-card-caption">CFG Sample 3</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="cfg_generated_image_sample_4.png" alt="CFG Sample 4">
+                            <div class="comparison-item-label">CFG Sample 4</div>
+                        </div>
+                        <div class="image-card">
+                            <img src="cfg_generated_image_sample_5.png" alt="CFG Sample 5">
+                            <div class="image-card-caption">CFG Sample 5</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Comparison: Without vs. With Classifier-Free Guidance</strong></p>
+                    <div class="comparison-container-2">
+                        <div class="comparison-item">
+                            <img src="generated_image_sample_1.png" alt="Without CFG">
+                            <div class="comparison-item-label">Without CFG</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="cfg_generated_image_sample_1.png" alt="With CFG">
+                            <div class="comparison-item-label">With CFG (γ=7)</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            The impact of classifier-free guidance is dramatic! Comparing the two sets of samples:
+                        </p>
+                        <ul>
+                            <li><strong>Without CFG:</strong> Blurry, low contrast, lacks semantic meaning</li>
+                            <li><strong>With CFG (γ=7):</strong> Clearer, higher contrast, better detail preservation
+                            </li>
+                        </ul>
+                        <p>
+                            By computing both conditional and unconditional noise estimates and combining them with γ=7,
+                            we achieve a sweet spot between diversity and guidance strength. Higher γ values would
+                            produce more
+                            guided but less diverse results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.7: Image-to-Image Translation -->
+            <div class="section">
+                <h2>1️⃣.7️⃣ Image-to-Image Translation</h2>
+                <div class="subsection">
+                    <h3>🎨 Controlling Edit Strength with Noise Levels</h3>
+                    <p>
+                        By varying the noise level (i.e., i_start), we can precisely control how much of the original
+                        image
+                        is preserved versus how much is reimagined according to the prompt. Lower i_start values
+                        correspond
+                        to less noise injection and more preservation, while higher values allow for more dramatic
+                        changes.
+                    </p>
+
+                    <p>Starting from the original image, we apply noise at different levels and denoise with CFG:</p>
+
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="campanile_original_64x64.png" alt="Original Campanile">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_1_campanile.png" alt="i_start=1">
+                            <div class="comparison-item-label">i_start=1<br></div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_3_campanile.png" alt="i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_5_campanile.png" alt="i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_7_campanile.png" alt="i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_10_campanile.png" alt="i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_20_campanile.png" alt="i_start=20">
+                            <div class="comparison-item-label">i_start=20<br></div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis - SDEdit Control</h4>
+                        <p>
+                            The sequence shows a gradual progression from preservation to transformation:
+                        </p>
+                        <ul>
+                            <li><strong>i_start=1-3:</strong> Minimal changes - mostly preserves original structure</li>
+                            <li><strong>i_start=5-10:</strong> Moderate editing - noticeable stylistic changes while
+                                keeping composition</li>
+                            <li><strong>i_start=20:</strong> Major transformation - results are quite different from the
+                                original</li>
+                        </ul>
+                        <p>
+                            This demonstrates the remarkable property of diffusion models: by controlling the starting
+                            noise level,
+                            we can precisely control how much creative "hallucination" occurs during denoising. This is
+                            the basis
+                            for many exciting applications like style transfer and content-aware image editing.
+                        </p>
+                    </div>
+
+                    <h3>🎨 Additional Test Images</h3>
+                    <p><strong>Jellyfish Image Editing</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="stage2_1_Bioluminescent_jelly.png" alt="Original Jellyfish">
+                            <div class="comparison-item-label">Original Jellyfish</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_1_stage2_1_Bioluminescent_jelly.png"
+                                alt="Jellyfish i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_3_stage2_1_Bioluminescent_jelly.png"
+                                alt="Jellyfish i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_5_stage2_1_Bioluminescent_jelly.png"
+                                alt="Jellyfish i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_7_stage2_1_Bioluminescent_jelly.png"
+                                alt="Jellyfish i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_10_stage2_1_Bioluminescent_jelly.png"
+                                alt="Jellyfish i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_20_stage2_1_Bioluminescent_jelly.png"
+                                alt="Jellyfish i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Van Gogh Starry Night Image Editing</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="stage2_2_Van_Gogh_style_starr.png" alt="Original Van Gogh">
+                            <div class="comparison-item-label">Original Van Gogh</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_1_stage2_2_Van_Gogh_style_starr.png" alt="Starry i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_3_stage2_2_Van_Gogh_style_starr.png" alt="Starry i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_5_stage2_2_Van_Gogh_style_starr.png" alt="Starry i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_7_stage2_2_Van_Gogh_style_starr.png" alt="Starry i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_10_stage2_2_Van_Gogh_style_starr.png"
+                                alt="Starry i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="edited_image_i_start_20_stage2_2_Van_Gogh_style_starr.png"
+                                alt="Starry i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.7.1: Editing Hand-Drawn and Web Images -->
+            <div class="section">
+                <h2>1️⃣.7️⃣.1️⃣ Editing Hand-Drawn and Web Images</h2>
+                <div class="subsection">
+                    <p>
+                        This section demonstrates the SDEdit technique applied to non-realistic images such as
+                        hand-drawn sketches and web images. By projecting these images onto the natural image manifold,
+                        we can transform them in creative ways while preserving their core structure.
+                    </p>
+
+                    <h3>🌐 Web Image Editing</h3>
+                    <p><strong>Original Web Image and Edited Versions at Different Noise Levels</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="web_image.jpg" alt="Web Image Original">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="web_image_edit_i_start_1.png" alt="Web Image i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="web_image_edit_i_start_3.png" alt="Web Image i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="web_image_edit_i_start_5.png" alt="Web Image i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="web_image_edit_i_start_7.png" alt="Web Image i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="web_image_edit_i_start_10.png" alt="Web Image i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="web_image_edit_i_start_20.png" alt="Web Image i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <h3>✏️ Hand-Drawn Image Editing</h3>
+                    <p><strong>Hand-Drawn Image 1 and Edited Versions at Different Noise Levels</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1.png" alt="Hand-Drawn Image 1 Original">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1_edit_i_start_1.png" alt="Hand-Drawn 1 i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1_edit_i_start_3.png" alt="Hand-Drawn 1 i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1_edit_i_start_5.png" alt="Hand-Drawn 1 i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1_edit_i_start_7.png" alt="Hand-Drawn 1 i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1_edit_i_start_10.png" alt="Hand-Drawn 1 i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image1_edit_i_start_20.png" alt="Hand-Drawn 1 i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Hand-Drawn Image 2 and Edited Versions at Different Noise Levels</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2.png" alt="Hand-Drawn Image 2 Original">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2_edit_i_start_1.png" alt="Hand-Drawn 2 i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2_edit_i_start_3.png" alt="Hand-Drawn 2 i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2_edit_i_start_5.png" alt="Hand-Drawn 2 i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2_edit_i_start_7.png" alt="Hand-Drawn 2 i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2_edit_i_start_10.png" alt="Hand-Drawn 2 i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="hand_drawn_image2_edit_i_start_20.png" alt="Hand-Drawn 2 i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            These examples demonstrate how SDEdit can effectively transform non-realistic images:
+                        </p>
+                        <ul>
+                            <li><strong>Web Images:</strong> Transform internet-sourced images into high-quality photos
+                                while preserving core composition</li>
+                            <li><strong>Hand-Drawn Images:</strong> Convert sketches and drawings into realistic
+                                interpretations, showing the model's ability to understand and enhance artistic inputs
+                            </li>
+                            <li><strong>Noise Level Control:</strong> Lower i_start values (1-5) preserve more of the
+                                original structure, while higher values (10-20) allow for more creative interpretation
+                            </li>
+                        </ul>
+                        <p>
+                            This technique is particularly powerful for creative applications where you want to
+                            enhance or transform artistic content while maintaining its essential character.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.7.2: Inpainting -->
+            <div class="section">
+                <h2>1️⃣.7️⃣.2️⃣ Inpainting</h2>
+                <div class="subsection">
+                    <h3>🩹 Image Inpainting</h3>
+                    <p>
+                        Using a RePaint-style approach, we replace unedited regions with the corresponding noisy version
+                        of the original image at each step, enabling the generation of content that is both natural and
+                        consistent with the image structure while replacing selected areas.
+                    </p>
+
+                    <p><strong>Campanile - Inpainting Comparison</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_campanile_Original_Image.png" alt="Campanile Original">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_campanile_Mask.png" alt="Campanile Mask">
+                            <div class="comparison-item-label">Mask</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_campanile_Inpainted_Result.png" alt="Campanile Inpainted">
+                            <div class="comparison-item-label">Inpainted Result</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Jellyfish Image Inpainting</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_stage1_1_Bioluminescent_jelly_Original_Image.png"
+                                alt="Jellyfish Original">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_stage1_1_Bioluminescent_jelly_Mask.png"
+                                alt="Jellyfish Mask">
+                            <div class="comparison-item-label">Mask</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_stage1_1_Bioluminescent_jelly_Inpainted_Result.png"
+                                alt="Jellyfish Inpainted">
+                            <div class="comparison-item-label">Inpainted Result</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Web Image Inpainting</strong></p>
+                    <div class="comparison-container-3">
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_web_image_Original_Image.png" alt="Web Original">
+                            <div class="comparison-item-label">Original Image</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_web_image_Mask.png" alt="Web Mask">
+                            <div class="comparison-item-label">Mask</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="inpainting_comparison_web_image_Inpainted_Result.png" alt="Web Inpainted">
+                            <div class="comparison-item-label">Inpainted Result</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            Inpainting can generate natural and consistent content in local regions while maintaining
+                            the overall image structure. By replacing unedited areas with the corresponding noisy
+                            version
+                            of the original image at each time step, the model maintains boundary consistency and
+                            generates high-quality fillings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.7.3: Text-Conditioned Image-to-Image -->
+            <div class="section">
+                <h2>1️⃣.7️⃣.3️⃣ Text-Conditioned Image-to-Image Translation</h2>
+                <div class="subsection">
+                    <h3>📝 SDEdit with Text Guidance</h3>
+                    <p>
+                        By combining SDEdit with text conditioning, we can preserve the original composition while
+                        making
+                        the results conform more closely to the text description. The following shows the editing
+                        effects
+                        using different prompts on Campanile, Web, and Van Gogh images.
+                    </p>
+
+                    <p><strong>Campanile - Prompt: "A lighthouse"</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="text-conditioned_original_image_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile Original TextCond">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_1_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_3_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_5_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_7_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_10_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_20_campanile_prompt_A_lighthouse.png"
+                                alt="Campanile i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Web Image - Prompt: "An anime girl with blue hair"</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="text-conditioned_original_image_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web Original TextCond">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_1_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_3_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_5_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_7_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_10_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_20_web_image_prompt_An_anime_girl_with_blue_hair.png"
+                                alt="Web i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Van Gogh Image - Prompt: "Van Gogh style starry night over a field of wheat"</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="text-conditioned_original_image_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh Original TextCond">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_1_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_3_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_5_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_7_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_10_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_20_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_wheat.png"
+                                alt="VanGogh i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Van Gogh Style Starry Night Over a Field of Cabbage - Prompt: "Van Gogh style starry
+                            night over a field of cabbage"</strong></p>
+                    <div class="comparison-container-7">
+                        <div class="comparison-item">
+                            <img src="stage1_2_Van_Gogh_style_starr.png" alt="VanGogh Cabbage Original TextCond">
+                            <div class="comparison-item-label">Original</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_1_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_cabbage.png"
+                                alt="VanGogh Cabbage i_start=1">
+                            <div class="comparison-item-label">i_start=1</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_3_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_cabbage.png"
+                                alt="VanGogh Cabbage i_start=3">
+                            <div class="comparison-item-label">i_start=3</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_5_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_cabbage.png"
+                                alt="VanGogh Cabbage i_start=5">
+                            <div class="comparison-item-label">i_start=5</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_7_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_cabbage.png"
+                                alt="VanGogh Cabbage i_start=7">
+                            <div class="comparison-item-label">i_start=7</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_10_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_cabbage.png"
+                                alt="VanGogh Cabbage i_start=10">
+                            <div class="comparison-item-label">i_start=10</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="text-conditioned_edited_image_i_start_20_stage1_2_Van_Gogh_style_starr_prompt_Van_Gogh_style_starry_night_over_a_field_of_cabbage.png"
+                                alt="VanGogh Cabbage i_start=20">
+                            <div class="comparison-item-label">i_start=20</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            Text conditioning makes the editing results influenced by both the original image and the
+                            prompt text. Smaller i_start values preserve more of the original structure, while larger
+                            values make the results conform more to the text description.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.8: Visual Anagrams -->
+            <div class="section">
+                <h2>👁️‍🗨️ 1.8 Visual Anagrams</h2>
+                <div class="subsection">
+                    <p>
+                        Visual anagrams are optical illusions created using diffusion models. These images change
+                        meaning when flipped upside down.
+                        The technique involves denoising an image with two different prompts simultaneously - one for
+                        the upright view and another
+                        for the flipped view. The resulting noise estimates are combined to create an image that
+                        represents both concepts.
+                    </p>
+
+                    <p><strong>Swan-Wolf Illusion</strong></p>
+                    <p>Upright prompt: "A beautiful white swan gliding on a serene lake"<br>
+                        Flipped prompt: "A fierce wolf howling at the full moon"</p>
+                    <div class="comparison-container-2">
+                        <div class="comparison-item">
+                            <img src="Swan-Wolf_upright.png" alt="Swan-Wolf Upright">
+                            <div class="comparison-item-label">Upright: Swan</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="Swan-Wolf_flipped.png" alt="Swan-Wolf Flipped">
+                            <div class="comparison-item-label">Flipped: Wolf</div>
+                        </div>
+                    </div>
+                    <p><strong>Girl-Old Witch Illusion</strong></p>
+                    <p>Upright prompt: "An elegant lady wearing a pearl necklace, vintage portrait"<br>
+                        Flipped prompt: "An old witch with a large hat and crooked nose"</p>
+                    <div class="comparison-container-2">
+                        <div class="comparison-item">
+                            <img src="Girl-Old_Witch_upright.png" alt="Girl-Old Witch Upright">
+                            <div class="comparison-item-label">Upright: Lady</div>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="Girl-Old_Witch_flipped.png" alt="Girl-Old Witch Flipped">
+                            <div class="comparison-item-label">Flipped: Witch</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            Visual anagrams demonstrate the powerful ability of diffusion models to encode multiple
+                            concepts into a single image.
+                            By simultaneously denoising with two different prompts and orientations, we can create
+                            compelling optical illusions that
+                            reveal different interpretations when viewed normally versus upside down. This technique
+                            leverages the high-dimensional
+                            nature of the diffusion model's latent space to encode multiple semantic meanings in the
+                            same image region.
+                        </p>
+                        <p>
+                            The quality of the illusions depends heavily on the relationship between the two prompts.
+                            Pairs with some visual
+                            similarities (like the Swan-Wolf example, both having similar shapes in the water/sky) tend
+                            to produce better results
+                            than completely unrelated concepts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 1.9: Hybrid Images -->
+            <div class="section">
+                <h2>🧬 1.9 Hybrid Images</h2>
+                <div class="subsection">
+                    <p>
+                        Hybrid images combine the low frequencies of one image with the high frequencies of another,
+                        creating a single image that appears as one concept when viewed up close and another when viewed
+                        from a distance. In this section, we use diffusion models to create hybrid images by combining
+                        noise estimates from two different text prompts - one contributing low frequencies and the other
+                        contributing high frequencies.
+                    </p>
+                    <p>
+                        The algorithm works by:
+                    </p>
+                    <ol>
+                        <li>Generating noise estimates using two different text prompts via Classifier-Free Guidance
+                        </li>
+                        <li>Applying a low-pass filter to the first noise estimate to extract low frequencies</li>
+                        <li>Applying a high-pass filter to the second noise estimate to extract high frequencies</li>
+                        <li>Combining these filtered noise estimates to create the final hybrid image</li>
+                    </ol>
+
+                    <p><strong>Cat (low) + Forests (high)</strong></p>
+                    <p>Low frequencies prompt: "A big cartoon orange cat face at the center of image with white
+                        background"<br>
+                        High frequencies prompt: "Green forests"</p>
+                    <div class="comparison-container-2">
+                        <div class="comparison-item">
+                            <img src="hybrid_Cat(low)+Forests(high).png" alt="Cat(low)+Forests(high) Hybrid">
+                            <div class="comparison-item-label">Cat(low) + Forests(high)</div>
+                        </div>
+                    </div>
+
+                    <p><strong>Whale (low) + Mountains (high)</strong></p>
+                    <p>Low frequencies prompt: "A big cartoon whale at the center of image with white background"<br>
+                        High frequencies prompt: "Rock mountain peaks"</p>
+                    <div class="comparison-container-2">
+                        <div class="comparison-item">
+                            <img src="hybrid_Whale(low)+Mountains(high).png" alt="Whale(low)+Mountains(high) Hybrid">
+                            <div class="comparison-item-label">Whale(low) + Mountains(high)</div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>✨ Analysis</h4>
+                        <p>
+                            Creating hybrid images with diffusion models demonstrates how semantic information can be
+                            separated and recombined in the latent noise space. By filtering noise estimates from
+                            different prompts, we can create images that contain semantic elements from both prompts.
+                        </p>
+                        <p>
+                            The success of hybrid images depends on the compatibility of the two prompts. Prompts that
+                            have some conceptual overlap or complementary spatial structures tend to produce better
+                            results. The filtering process (using Gaussian blur with kernel size 33 and sigma 3) is
+                            crucial for separating frequency components effectively.
+                        </p>
+                        <p>
+                            Unlike traditional image-based hybrid techniques, this approach works in the semantic latent
+                            space of the diffusion model, allowing for more creative and abstract combinations that
+                            wouldn't be possible with pixel-based methods alone.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="section">
+                <h2>📚 Key Takeaways</h2>
+                <div class="subsection">
+                    <div class="analysis-box">
+                        <h4>🎓 Core Concepts Demonstrated</h4>
+                        <ul>
+                            <li><strong>Forward Process:</strong> Mathematical framework for adding controlled noise to
+                                images</li>
+                            <li><strong>Reverse Process (Denoising):</strong> Using deep neural networks to
+                                progressively remove noise</li>
+                            <li><strong>DDPM Sampling:</strong> Skipping timesteps allows efficient high-quality image
+                                generation</li>
+                            <li><strong>Classifier-Free Guidance:</strong> Balancing conditional guidance with
+                                unconditional generation</li>
+                            <li><strong>SDEdit:</strong> Precise control over image editing through noise-level
+                                manipulation</li>
+                        </ul>
+                    </div>
+
+                    <div class="analysis-box">
+                        <h4>🔬 Technical Implementation</h4>
+                        <ul>
+                            <li>Implemented forward diffusion process from mathematical principles</li>
+                            <li>Built complete DDPM sampling loop with variance prediction</li>
+                            <li>Applied classifier-free guidance with configurable strength (γ=7)</li>
+                            <li>Validated image quality improvements across multiple denoising approaches</li>
+                            <li>Demonstrated fine-grained control over creative editing via noise scheduling</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-banner">
+                        <strong>🌱 Reproducibility Note:</strong> All experiments use seed=100 for consistent results
+                        across runs.
+                        Different seeds will produce different samples but with identical quality characteristics.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>CS 180 Project 5A | UC Berkeley | Diffusion Models and Applications</p>
+            <p style="font-size: 0.9em; margin-top: 10px; color: #999;">
+                Generated showcase of Parts 1.1 - 1.7 | DeepFloyd IF Model
+            </p>
+        </footer>
+    </div>
+</body>
+
+</html>
